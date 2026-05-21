@@ -67,13 +67,13 @@ export async function showSetupScreen(): Promise<AppConfig> {
             <button id="tfs-btn">Seleccionar</button>
           </div>
           <p style="font-size:11px; color:#6b7280; margin-top:4px;">
-            Debe ser una copia local de /opt/tfs/ que contenga data/monster/, data/npc/, data/world/ y data/globalevents/.
+            Carpeta local sincronizada con el VPS. Usa sync-from-vps.ps1 para actualizar y sync-to-vps.ps1 para subir cambios.
           </p>
         </div>
 
         <div id="hint" style="display:none; padding:10px; background:#1e3a2f; border:1px solid #166534;
              border-radius:6px; font-size:12px; color:#86efac; margin-bottom:16px;">
-          ✅ Tibia.dat y Tibia.spr ya detectados en la carpeta del cliente OTClient.
+          ✅ Tibia.dat, Tibia.spr y carpeta TFS local detectados automáticamente.
         </div>
 
         <button id="start-btn" style="
@@ -118,21 +118,25 @@ export async function showSetupScreen(): Promise<AppConfig> {
       startBtn.style.pointerEvents = ready ? 'auto' : 'none'
     }
 
-    // Try to pre-fill known .dat/.spr location
+    // Try to pre-fill known paths
     const autoFill = async () => {
-      // Try the known path from OTClient installation
       const knownDat = 'C:\\Users\\Admin\\Downloads\\cliente tibia\\otclient-4.0\\otclient-4.0\\data\\things\\1098\\Tibia.dat'
       const knownSpr = 'C:\\Users\\Admin\\Downloads\\cliente tibia\\otclient-4.0\\otclient-4.0\\data\\things\\1098\\Tibia.spr'
-      const [datExists, sprExists] = await Promise.all([
+      const knownTfs = 'C:\\Users\\Admin\\germantec-tfs-local'
+      const [datExists, sprExists, tfsExists] = await Promise.all([
         window.electronAPI.exists(knownDat),
-        window.electronAPI.exists(knownSpr)
+        window.electronAPI.exists(knownSpr),
+        window.electronAPI.exists(knownTfs)
       ])
       if (datExists && sprExists) {
         datPath.value = knownDat
         sprPath.value = knownSpr
         hint.style.display = 'block'
-        checkReady()
       }
+      if (tfsExists) {
+        tfsPath.value = knownTfs
+      }
+      checkReady()
     }
     autoFill()
 
